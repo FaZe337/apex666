@@ -14,9 +14,9 @@ private:
     long m_lastTimeFileEdited = 0;
 
     // features
-    bool m_featureAimbotOn = false;
-    bool m_featureNoRecoilOn = false;
-    bool m_featureSenseOn = false;
+    bool m_featureAimbotOn = true;
+    bool m_featureNoRecoilOn = true;
+    bool m_featureSenseOn = true;
 
     // aimbot
     int m_aimbotTrigger = 0x0000;
