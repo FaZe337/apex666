@@ -1,3 +1,4 @@
+
 #pragma once
 #include <vector>
 #include "LocalPlayer.cpp"
@@ -6,15 +7,34 @@
 #include "Level.cpp"
 #include "math.h"
 #include "X11Utils.cpp"
+#include "ConfigLoader.cpp"
 
 class Aimbot
 {
 private:
-    const int m_smoothing = 3;   // If you cross-hairs are not on target then this smoothness will be used.
-    const int m_activationFOV = 3; // FOV for activation
+    ConfigLoader *m_configLoader;
+    Level *m_level;
+    LocalPlayer *m_localPlayer;
+    std::vector<Player *> *m_players;
+    X11Utils *m_x11Utils;
+
+    Player *m_lockedOnPlayer = nullptr;
 
 public:
-    void update(Level *level, LocalPlayer *localPlayer, std::vector<Player *> *players, X11Utils *x11Utils)
+    Aimbot(ConfigLoader *configLoader,
+           Level *level,
+           LocalPlayer *localPlayer,
+           std::vector<Player *> *players,
+           X11Utils *x11Utils)
+    {
+        m_configLoader = configLoader;
+        m_level = level;
+        m_localPlayer = localPlayer;
+        m_players = players;
+        m_x11Utils = x11Utils;
+    }
+    void update()
+    {
         // validations
         if (m_configLoader->getAimbotTrigger() != 0x0000)
         { // our trigger is a button
@@ -47,40 +67,26 @@ public:
             }
 
         // get desired angle to an enemy
-        double desiredViewAngleYaw = (double)rand()/(RAND_MAX)+(rand()%50);
-        double desiredViewAnglePitch = (double)rand()/(RAND_MAX)+(rand()%50);
+        double desiredViewAngleYaw = 0;
+        double desiredViewAnglePitch = 0;
         if (m_level->isTrainingArea())
         {
-            double distanceToTarget = math::calculateDistanceInMeters(m_localPlayer->getLocationX(),
-                                                                      m_localPlayer->getLocationY(),
-                                                                      m_localPlayer->getLocationZ(),
-                                                                      31518,
-                                                                      -6712,
-                                                                      -29235);
+            printf("X:%.6f \t Y: %.6f \t Z:%.6f \n", m_localPlayer->getLocationX(), m_localPlayer->getLocationY(), m_localPlayer->getLocationZ());
+            const float dummyX = 31408.732422;
+            const float dummyY = -6711.955566;
+            const float dummyZ = -29234.839844;
+            double distanceToTarget = math::calculateDistanceInMeters(m_localPlayer->getLocationX(), m_localPlayer->getLocationY(), m_localPlayer->getLocationZ(), dummyX, dummyY, dummyZ);
             if (distanceToTarget > m_configLoader->getAimbotMaxRange())
                 return;
-            desiredViewAngleYaw = calculateDesiredYaw(m_localPlayer->getLocationX(),
-                                                      m_localPlayer->getLocationY(),
-                                                      31518,
-                                                      -6712);
-            desiredViewAnglePitch = calculateDesiredPitch(m_localPlayer->getLocationX(),
-                                                          m_localPlayer->getLocationY(),
-                                                          m_localPlayer->getLocationZ(),
-                                                          31518,
-                                                          -6712,
-                                                          -29235);
+            desiredViewAngleYaw = calculateDesiredYaw(m_localPlayer->getLocationX(), m_localPlayer->getLocationY(), dummyX, dummyY);
+            desiredViewAnglePitch = calculateDesiredPitch(m_localPlayer->getLocationX(), m_localPlayer->getLocationY(), m_localPlayer->getLocationZ(), dummyX, dummyY, dummyZ);
         }
         else
         {
-            if (m_lockedOnPlayer == nullptr)
+            if (m_lockedOnPlayer == nullptr || !m_lockedOnPlayer->isVisible())
                 m_lockedOnPlayer = findClosestEnemy();
             if (m_lockedOnPlayer == nullptr)
                 return;
-            
-            if(m_lockedOnPlayer != m_lockedOnPlayerBefore){
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
-
             double distanceToTarget = math::calculateDistanceInMeters(m_localPlayer->getLocationX(),
                                                                       m_localPlayer->getLocationY(),
                                                                       m_localPlayer->getLocationZ(),
@@ -99,15 +105,13 @@ public:
                                                           m_lockedOnPlayer->getLocationX(),
                                                           m_lockedOnPlayer->getLocationY(),
                                                           m_lockedOnPlayer->getLocationZ());
-
-            m_lockedOnPlayerBefore = m_lockedOnPlayer;
         }
 
         // Setup Pitch
         const double pitch = m_localPlayer->getPitch();
         const double pitchAngleDelta = calculatePitchAngleDelta(pitch, desiredViewAnglePitch);
         const double pitchAngleDeltaAbs = abs(pitchAngleDelta);
-        if (pitchAngleDeltaAbs > (double)rand()/(RAND_MAX)+(rand()%1) + m_configLoader->getAimbotActivationFOV() / 2) 
+        if (pitchAngleDeltaAbs > m_configLoader->getAimbotActivationFOV() / 2)
             return;
 
         // Setup Yaw
@@ -118,16 +122,12 @@ public:
             return;
         double newYaw = flipYawIfNeeded(yaw + (angleDelta / m_configLoader->getAimbotSmoothing()));
         m_localPlayer->setYaw(newYaw);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(m_configLoader->getAimbotSleepTime()));
-
-
     }
     double flipYawIfNeeded(double angle)
     {
         double myAngle = angle;
         if (myAngle > 180)
-            myAngle = (360 - myAngle) * -1 + (double)rand()/(RAND_MAX)+(rand()%4);
+            myAngle = (360 - myAngle) * -1;
         else if (myAngle < -180)
             myAngle = (360 + myAngle);
         return myAngle;
@@ -142,7 +142,7 @@ public:
         double wayA = newAngle - oldAngle;
         double wayB = 360 - abs(wayA);
         if (wayA > 0 && wayB > 0)
-            wayB *= -1 + (double)rand()/(RAND_MAX)+(rand()%4);
+            wayB *= -1;
         if (abs(wayA) < abs(wayB))
             return wayA;
         return wayB;
