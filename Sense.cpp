@@ -19,7 +19,8 @@ public:
             if (!player->isValid())
                 continue;
             if (player->getTeamNumber() == localPlayer->getTeamNumber())
-                continue;
+                continue; {
+                          
 
             //if (player->isVisible()){
 
@@ -55,4 +56,4 @@ public:
             } */
         }
     }
-};
+}^
