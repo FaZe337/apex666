@@ -1,4 +1,3 @@
-
 #pragma once
 #include <vector>
 #include "LocalPlayer.cpp"
@@ -11,30 +10,11 @@
 class Aimbot
 {
 private:
-    ConfigLoader *m_configLoader;
-    Level *m_level;
-    LocalPlayer *m_localPlayer;
-    std::vector<Player *> *m_players;
-    X11Utils *m_x11Utils;
-
-    Player *m_lockedOnPlayer = nullptr;
-    Player *m_lockedOnPlayerBefore = nullptr;
+    const int m_smoothing = 3;   // If you cross-hairs are not on target then this smoothness will be used.
+    const int m_activationFOV = 3; // FOV for activation
 
 public:
-    Aimbot(ConfigLoader *configLoader,
-           Level *level,
-           LocalPlayer *localPlayer,
-           std::vector<Player *> *players,
-           X11Utils *x11Utils)
-    {
-        m_configLoader = configLoader;
-        m_level = level;
-        m_localPlayer = localPlayer;
-        m_players = players;
-        m_x11Utils = x11Utils;
-    }
-    void update()
-    {
+    void update(Level *level, LocalPlayer *localPlayer, std::vector<Player *> *players, X11Utils *x11Utils)
         // validations
         if (m_configLoader->getAimbotTrigger() != 0x0000)
         { // our trigger is a button
