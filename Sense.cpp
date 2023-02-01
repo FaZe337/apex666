@@ -8,24 +8,8 @@
 
 class Sense
 {
-private:
-    Level *m_level;
-    LocalPlayer *m_localPlayer;
-    std::vector<Player *> *m_players;
-    X11Utils *m_x11Utils;
-
 public:
-          Level *level,
-          LocalPlayer *localPlayer,
-          std::vector<Player *> *players,
-          X11Utils *x11Utils)
-    {
-        m_level = level;
-        m_localPlayer = localPlayer;
-        m_players = players;
-        m_x11Utils = x11Utils;
-    }
-    void update()
+    void update(Level *level, LocalPlayer *localPlayer, std::vector<Player *> *players, X11Utils *x11Utils)
     {
         if (!m_level->isPlayable())
             return;
