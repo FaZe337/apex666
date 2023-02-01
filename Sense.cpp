@@ -47,12 +47,12 @@ public:
 
 
              }
-            else
+              else
             {
-                    player->setGlowEnable(7);
+                    Player->setGlowEnable(7);
                 player->setGlowThroughWall(2);
             }
-                player->setCustomGlow();
+                Player->setCustomGlow();
                 player->setCustomGlowRed();
-            } */
-        }
+            } 
+        };
