@@ -50,9 +50,9 @@ public:
               else
             {
                     Player->setGlowEnable(7);
-                player->setGlowThroughWall(2);
+                Player->setGlowThroughWall(2);
             }
                 Player->setCustomGlow();
-                player->setCustomGlowRed();
+                Player->setCustomGlowRed();
             } 
         };
