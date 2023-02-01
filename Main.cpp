@@ -70,4 +70,4 @@ int main(int argc, char *argv[])
         counter++;
         if (counter > 1000)
             counter = 0;
-    }
+    {
