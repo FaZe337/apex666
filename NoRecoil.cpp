@@ -9,57 +9,34 @@
 class NoRecoil
 {
 private:
-    ConfigLoader *m_configLoader;
-    Level *m_level;
-    LocalPlayer *m_localPlayer;
-    std::vector<Player *> *m_players;
-    X11Utils *m_x11Utils;
-
+    const double m_streangthPitch = 0.4;
+    const double m_streangthYaw = 0.4;
     double m_previousPunchPitch = 0;
     double m_previousPunchYaw = 0;
 
 public:
-    NoRecoil(ConfigLoader *configLoader,
-             Level *level,
-             LocalPlayer *localPlayer,
-             std::vector<Player *> *players,
-             X11Utils *x11Utils)
+    void update(Level *level, LocalPlayer *localPlayer, X11Utils *x11Utils)
     {
-        m_configLoader = configLoader;
-        m_level = level;
-        m_localPlayer = localPlayer;
-        m_players = players;
-        m_x11Utils = x11Utils;
-    }
-    void update()
-    {
-        // validations
-        if (!m_level->isPlayable())
+        if (!level->isPlayable())
             return;
-        if (m_localPlayer->isDead())
+        if (localPlayer->isDead())
             return;
-        if (m_localPlayer->isKnocked())
+        if (localPlayer->isKnocked())
             return;
-
-        // adjust pitch
-        const double norecoilPitchStrength = ((float)rand()/RAND_MAX)*(float)(0.10) + m_configLoader->getNorecoilPitchStrength();
-        const double punchPitch = m_localPlayer->getPunchPitch();
+        const double punchPitch = localPlayer->getPunchPitch();
         if (punchPitch != 0)
         {
-            const double pitch = m_localPlayer->getPitch();
-            const double punchPitchDelta = (punchPitch - m_previousPunchPitch) * norecoilPitchStrength;
-            m_localPlayer->setPitch(pitch - punchPitchDelta);
+            const double pitch = localPlayer->getPitch();
+            const double punchPitchDelta = (punchPitch - m_previousPunchPitch) * m_streangthPitch;
+            localPlayer->setPitch(pitch - punchPitchDelta);
             m_previousPunchPitch = punchPitch;
         }
-
-        // adjust yaw
-        const double norecoilYawStrength = ((float)rand()/RAND_MAX)*(float)(0.10) + m_configLoader->getNorecoilYawStrength();
-        const double punchYaw = m_localPlayer->getPunchYaw();
+        const double punchYaw = localPlayer->getPunchYaw();
         if (punchYaw != 0)
         {
-            const double yaw = m_localPlayer->getYaw();
-            const double punchYawDelta = (punchYaw - m_previousPunchYaw) * norecoilYawStrength;
-            m_localPlayer->setYaw(yaw - punchYawDelta);
+            const double yaw = localPlayer->getYaw();
+            const double punchYawDelta = (punchYaw - m_previousPunchYaw) * m_streangthYaw;
+            localPlayer->setYaw(yaw - punchYawDelta);
             m_previousPunchYaw = punchYaw;
         }
     }
