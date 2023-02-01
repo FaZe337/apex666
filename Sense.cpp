@@ -11,14 +11,14 @@ class Sense
 public:
     void update(Level *level, LocalPlayer *localPlayer, std::vector<Player *> *players, X11Utils *x11Utils)
     {
-        if (!m_level->isPlayable())
+        if (!level->isPlayable())
             return;
-        for (int i = 0; i < m_players->size(); i++)
+        for (int i = 0; i < players->size(); i++)
         {
-            Player *player = m_players->at(i);
+            Player *player = players->at(i);
             if (!player->isValid())
                 continue;
-            if (player->getTeamNumber() == m_localPlayer->getTeamNumber())
+            if (player->getTeamNumber() == localPlayer->getTeamNumber())
                 continue;
 
             //if (player->isVisible()){
