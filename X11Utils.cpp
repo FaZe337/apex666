@@ -12,11 +12,11 @@ private:
     Display *display = XOpenDisplay(NULL);
 
 public:
-    bool keyDown(int keyCode)
+    bool triggerKeyDown()
     {
         char keys_return[32];
         XQueryKeymap(display, keys_return);
-        KeyCode kc2 = XKeysymToKeycode(display, keyCode);
+        KeyCode kc2 = XKeysymToKeycode(display, XK_Shift_L);
         bool buttonDown = !!(keys_return[kc2 >> 3] & (1 << (kc2 & 7)));
         return buttonDown;
     }
